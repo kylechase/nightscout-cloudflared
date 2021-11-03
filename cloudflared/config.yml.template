@@ -1,0 +1,3 @@
+url: http://nightscout:1337
+tunnel: YOUR_TUNNEL_UUID_HERE
+credentials-file: /etc/cloudflared/YOUR_TUNNEL_UUID_HERE.json

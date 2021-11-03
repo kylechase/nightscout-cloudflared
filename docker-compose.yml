@@ -1,0 +1,37 @@
+version: "3"
+services:
+  nightscout:
+    build: cgm-remote-monitor
+    container_name: ${NS_CONTAINER_NAME}
+    env_file: .env
+    environment:
+      - MONGODB_URI=mongodb://${MONGO_NS_USER}:${MONGO_NS_PASSWORD}@mongo:27017/${MONGO_NS_DB}?retryWrites=true&w=majority
+      - HOSTNAME=${NS_CONTAINER_NAME}
+    restart: unless-stopped
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo
+    restart: unless-stopped
+    command: mongod --auth
+    env_file: .env
+    volumes:
+      - mongo-data:/data/db
+      - ./init:/docker-entrypoint-initdb.d
+  mongo-express:
+    image: mongo-express
+    restart: always
+    env_file: .env
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://${ME_CONFIG_MONGODB_ADMINUSERNAME}:${ME_CONFIG_MONGODB_ADMINPASSWORD}@mongo:27017/admin
+    depends_on:
+      - mongo
+  cloudflared:
+    image: cloudflare/cloudflared:2021.9.2
+    volumes:
+      - ./cloudflared:/etc/cloudflared
+    command: --config /etc/cloudflared/config.yml tunnel run
+    depends_on:
+      - nightscout
+volumes:
+  mongo-data:

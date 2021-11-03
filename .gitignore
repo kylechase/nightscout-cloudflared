@@ -1,0 +1,3 @@
+cgm-remote-monitor
+.env
+cloudflared/config.yml
